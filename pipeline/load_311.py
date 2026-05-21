@@ -69,7 +69,6 @@ def load_year(year: int) -> pd.DataFrame:
 def to_geodataframe(df: pd.DataFrame, crs: str) -> gpd.GeoDataFrame:
     """
     Converts a DataFrame with lat/lon columns to a GeoDataFrame.
-    R equivalent: st_as_sf(df, coords = c("longitude", "latitude"))
     """
     return gpd.GeoDataFrame(
         df,
@@ -83,8 +82,6 @@ def erase_water(
 ) -> gpd.GeoDataFrame:
     """
     Removes water bodies from tract geometries.
-    R equivalent:
-        st_erase <- function(x, y) st_difference(x, st_union(y))
     """
     water_union = unary_union(water_gdf.geometry)
     tracts_gdf = tracts_gdf.copy()
@@ -99,7 +96,7 @@ def erase_water(
 
 def get_nyc_tracts() -> gpd.GeoDataFrame:
     """
-    Downloads NYC census tracts via pygris (mirrors tigris::tracts()).
+    Downloads NYC census tracts via pygris.
     Cached to disk after first download.
     """
     cache_path = INTERMEDIATE_DIR / "nyc_tracts.parquet"
@@ -118,7 +115,7 @@ def get_nyc_tracts() -> gpd.GeoDataFrame:
 
 def get_nyc_water() -> gpd.GeoDataFrame:
     """
-    Downloads NYC water areas via pygris (mirrors tigris::area_water()).
+    Downloads NYC water areas via pygris.
     Cached to disk after first download.
     """
     cache_path = INTERMEDIATE_DIR / "nyc_water.parquet"
@@ -163,8 +160,6 @@ def process_year(
     gc.collect()
 
     # 3. Spatial join: which tract contains each 311 call?
-    #    R: st_join(nyc_tracts, nyc_geo, join = st_contains)
-    #    geopandas sjoin uses "contains" predicate equivalently
     joined = gpd.sjoin(
         nyc_tracts[["GEOID", "geometry"]],
         gdf_points[["geometry"]],
@@ -174,7 +169,7 @@ def process_year(
     del gdf_points
     gc.collect()
 
-    # 4. Count calls per tract (R: group_by(GEOID) %>% summarise(n = n()))
+    # 4. Count calls per tract
     counts = joined.groupby("GEOID").size().reset_index(name=f"n311_{year}")
 
     # Re-attach geometry from tracts
@@ -182,7 +177,7 @@ def process_year(
     result[f"n311_{year}"] = result[f"n311_{year}"].fillna(0).astype(int)
     result = gpd.GeoDataFrame(result, crs=CENSUS_CRS)
 
-    # 5. Erase water (R: st_erase(df_311, ny_water))
+    # 5. Erase water
     result = erase_water(result, ny_water)
 
     print(
@@ -194,10 +189,6 @@ def process_year(
 def merge_years(yearly_gdfs: list[gpd.GeoDataFrame]) -> gpd.GeoDataFrame:
     """
     Merges per-year GeoDataFrames into one, joining on GEOID.
-    R equivalent:
-        df_311all <- df_311_10 %>%
-          bind_cols(df_311_11 %>% st_drop_geometry() %>% select(-GEOID)) %>%
-          ...
     """
     base = yearly_gdfs[0]
     for gdf in yearly_gdfs[1:]:
