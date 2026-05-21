@@ -1,0 +1,7 @@
+pandas>=2.0
+geopandas>=0.14
+pygris>=0.1.6
+shapely>=2.0
+pyarrow>=14.0       # for .parquet read/write
+duckdb>=0.10
+matplotlib>=3.7     # for quick plots
