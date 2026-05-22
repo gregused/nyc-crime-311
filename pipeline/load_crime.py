@@ -68,14 +68,6 @@ def process_year(
     year: int,
     nyc_tracts: gpd.GeoDataFrame,
 ) -> gpd.GeoDataFrame:
-    """
-    Full pipeline for one year:
-      1. Load raw CSV
-      2. Filter to felony offense types
-      3. Convert to GeoDataFrame (WGS84 -> CENSUS_CRS)
-      4. Spatial join -> count felonies per tract
-      5. Replace count of 1 with 0 (matches R: if_else(x == 1, 0, x))
-    """
     print(f"\n--- Processing {year} ---")
 
     # 1. Load
@@ -106,7 +98,7 @@ def process_year(
     result = nyc_tracts[["GEOID", "geometry"]].merge(counts, on="GEOID", how="left")
     result[f"felony{year}"] = result[f"felony{year}"].fillna(0).astype(int)
 
-    # 5. Replace 1 -> 0 (R: mutate(across(..., replace1)))
+    # 5. Replace 1 -> 0
     #    Spatial artifact: tracts with count of 1 treated as zero
     result[f"felony{year}"] = result[f"felony{year}"].replace(1, 0)
 
