@@ -1,13 +1,3 @@
-"""
-pipeline/ingest/load_311.py
-
-Ingests raw 311 CSV files (one per year), drops rows without coordinates,
-spatially joins to NYC census tracts, erases water bodies, and returns
-a single GeoDataFrame with one column per year (n311_YYYY) keyed by GEOID.
-
-"""
-
-# import re
 import gc
 from pathlib import Path
 
@@ -22,7 +12,7 @@ import pygris
 
 RAW_DIR = Path("data/311_raw")
 INTERMEDIATE_DIR = Path("data/intermediate")
-YEARS = range(2010, 2015)  # 2010-2014 inclusive
+YEARS = range(2010, 2026)  # 2010-2025 inclusive
 
 NYC_COUNTIES = ["Kings", "Bronx", "Queens", "Richmond", "New York"]
 STATE = "NY"
@@ -105,7 +95,7 @@ def get_nyc_tracts() -> gpd.GeoDataFrame:
         return gpd.read_parquet(cache_path)
 
     print("  Downloading NYC census tracts via pygris ...")
-    tracts = pygris.tracts(state=STATE, county=NYC_COUNTIES, year=2020)
+    tracts = pygris.tracts(state=STATE, county=NYC_COUNTIES, year=2022)
     tracts = tracts.to_crs(CENSUS_CRS)
 
     INTERMEDIATE_DIR.mkdir(parents=True, exist_ok=True)
