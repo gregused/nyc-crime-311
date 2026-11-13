@@ -27,10 +27,7 @@ CENSUS_CRS = "EPSG:4269"
 
 
 def clean_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Replicates janitor::clean_names() — lowercases and snake_cases all columns.
-    e.g. 'Created Date' -> 'created_date'
-    """
+
     df.columns = (
         df.columns.str.strip()
         .str.lower()

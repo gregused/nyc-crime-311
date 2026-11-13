@@ -98,10 +98,6 @@ def process_year(
     result = nyc_tracts[["GEOID", "geometry"]].merge(counts, on="GEOID", how="left")
     result[f"felony{year}"] = result[f"felony{year}"].fillna(0).astype(int)
 
-    # 5. Replace 1 -> 0
-    #    Spatial artifact: tracts with count of 1 treated as zero
-    result[f"felony{year}"] = result[f"felony{year}"].replace(1, 0)
-
     result = gpd.GeoDataFrame(result, crs=CENSUS_CRS)
 
     print(

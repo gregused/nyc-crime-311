@@ -6,3 +6,5 @@ pyarrow>=14.0       # for .parquet read/write
 duckdb>=0.10
 matplotlib>=3.7     # for quick plots
 openpyxl>=3.1
+census>=0.8
+python-dotenv>=1.0
