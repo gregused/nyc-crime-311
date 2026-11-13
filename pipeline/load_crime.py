@@ -92,8 +92,10 @@ def process_year(
     del gdf_points
     gc.collect()
 
-    # 4. Count felonies per tract
-    counts = joined.groupby("GEOID").size().reset_index(name=f"felony{year}")
+    # 4. Count actual felony points per tract
+    counts = (
+        joined.groupby("GEOID")["index_right"].count().reset_index(name=f"felony{year}")
+    )
 
     result = nyc_tracts[["GEOID", "geometry"]].merge(counts, on="GEOID", how="left")
     result[f"felony{year}"] = result[f"felony{year}"].fillna(0).astype(int)
